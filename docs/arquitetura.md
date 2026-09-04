@@ -50,9 +50,7 @@ avalia-se Spring Cloud Gateway mais tarde.
 | `siac-postgres` | `postgres:17` | `siac-internal` | 0.50 cpu / 512m | 0 |
 | `siac-auth` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 1 |
 | `siac-core` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 2 |
-| `siac-operacoes` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 3 |
-| `siac-financeiro` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 4 |
-| `siac-assembleias` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 5 |
+| 
 
 Notas:
 - Host é um Raspberry Pi 5 (ARM64, RAM partilhada com outras stacks): imagens

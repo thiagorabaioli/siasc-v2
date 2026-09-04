@@ -10,9 +10,10 @@ Papéis fixos do produto:
 
 | Papel | Descrição |
 |---|---|
+`SUPER_ADMIN_SIAC` | Administração da plataforma toda  |
 | `ADMIN_SIAC` | Administração da plataforma (nós) |
 | `GESTOR_CONDOMINIO` | Empresa/pessoa que administra um ou mais condomínios |
-| `PORTEIRO_ZELADOR` | Operação diária no local |
+| `REPRESENTANTE_CONDOMINIO` | Operação diária no local |
 | `TECNICO_FORNECEDOR` | Externo, acesso restrito às suas intervenções |
 | `CONDOMINO` | Proprietário/residente de fração |
 
