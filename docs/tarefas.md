@@ -19,15 +19,15 @@ paralelo).
 
 ## Fase 1 — Segurança (gate: nada de dados antes disto)
 
-- [ ] Esqueleto `backend/siac-auth` (Maven, Spring Boot 3, Flyway, Dockerfile multi-stage arm64)
-- [ ] Modelo `siac_auth`: utilizadores, papéis, âmbitos, refresh tokens
-- [ ] RF-AUTH-01 login + JWT RS256 + refresh
-- [ ] RF-AUTH-02 papéis e âmbitos no token
-- [ ] RF-AUTH-03 endpoint JWKS interno
-- [ ] RF-AUTH-06 lockout progressivo + log de falhas
+- [x] Esqueleto `backend/siac-auth` (Maven, Spring Boot 3, Flyway, Dockerfile multi-stage arm64)
+- [x] Modelo `siac_auth`: utilizadores, papéis, âmbitos, refresh tokens
+- [x] RF-AUTH-01 login + JWT RS256 + refresh
+- [x] RF-AUTH-02 papéis e âmbitos no token
+- [x] RF-AUTH-03 endpoint JWKS interno
+- [x] RF-AUTH-06 lockout progressivo + log de falhas
 - [ ] Frontend: página de login, guarda de rotas, token em memória + refresh
-- [ ] Testes de segurança da matriz 401/403 (ver `docs/testes.md`)
-- [ ] Seed do utilizador `ADMIN_SIAC` inicial (password via `.env`, forçar troca)
+- [x] Testes de segurança da matriz 401/403 (ver `docs/testes.md`)
+- [x] Seed do utilizador `ADMIN_SIAC` inicial (password via `.env`, forçar troca)
 - [ ] **Só aqui**: ativar hostname `siasc.sias.pt` → `siac-frontend` no túnel
 
 ## Fase 2 — Núcleo (`siac-core`)
@@ -85,3 +85,17 @@ frações, pessoas e operações do dia a dia.
   estavam fechadas, decidiu-se fechá-las primeiro em vez de avançar
   diretamente para `siac-core`, respeitando a ordem de fases deste
   documento.
+- 2026-09-04 — `siac-auth`: refresh token viaja num cookie HttpOnly+Secure+
+  SameSite=Strict (nunca chega ao JS), access token só no corpo da resposta
+  (frontend guarda em memória). Reutilização de um refresh token já rodado
+  revoga todos os tokens ativos do utilizador (deteção de furto). Duas
+  armadilhas encontradas e corrigidas, guardadas aqui para não se repetirem:
+  (1) `@Transactional` reverte tudo o que a mesma transação gravou quando o
+  método acaba a lançar exceção — o registo de tentativa falhada (lockout) e
+  a revogação em massa (deteção de furto) tiveram de sair para um bean à
+  parte com `REQUIRES_NEW`; (2) `proxy_pass` do nginx com host por variável
+  (necessário para resolução DNS tardia dos backends) não remove sozinho o
+  prefixo da location — é preciso um `rewrite ... break` para o tirar, e
+  esse `rewrite` tem de vir **depois** do `set` da variável, senão o `set`
+  nunca corre (`break` para o resto da fase de rewrite) e o proxy falha com
+  "no host in upstream".

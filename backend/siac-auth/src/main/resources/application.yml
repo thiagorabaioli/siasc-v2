@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: siac-auth
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://siac-postgres:5432/siac?currentSchema=siac_auth}
+    username: ${SPRING_DATASOURCE_USERNAME:siac_auth_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: siac_auth
+  flyway:
+    schemas: siac_auth
+    default-schema: siac_auth
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+siac:
+  auth:
+    jwt:
+      issuer: siac-auth
+      access-token-ttl: 15m
+      refresh-token-ttl: 30d
+    lockout:
+      max-attempts: 5
+      base-minutes: 1
+      cap-minutes: 60
+    admin-seed:
+      email: ${SIAC_ADMIN_INITIAL_EMAIL:admin@siasc.pt}
+      password: ${SIAC_ADMIN_INITIAL_PASSWORD:}
+
+logging:
+  level:
+    pt.sias.siac.auth: INFO

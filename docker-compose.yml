@@ -16,6 +16,31 @@ services:
       retries: 5
       start_period: 10s
 
+  siac-auth:
+    build:
+      context: ./backend/siac-auth
+    container_name: siac-auth
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://siac-postgres:5432/${POSTGRES_DB}?currentSchema=siac_auth
+      SPRING_DATASOURCE_USERNAME: siac_auth_user
+      SPRING_DATASOURCE_PASSWORD: ${SIAC_AUTH_DB_PASSWORD}
+      SIAC_ADMIN_INITIAL_EMAIL: ${SIAC_ADMIN_INITIAL_EMAIL}
+      SIAC_ADMIN_INITIAL_PASSWORD: ${SIAC_ADMIN_INITIAL_PASSWORD}
+    networks:
+      - siac-internal
+    depends_on:
+      siac-postgres:
+        condition: service_healthy
+    cpus: 0.50
+    mem_limit: 384m
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   siac-postgres:
     image: postgres:17
     container_name: siac-postgres
