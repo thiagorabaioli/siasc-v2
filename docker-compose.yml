@@ -1,0 +1,53 @@
+services:
+  siac-frontend:
+    build:
+      context: ./frontend
+    container_name: siac-frontend
+    restart: unless-stopped
+    networks:
+      - siac-edge
+      - siac-internal
+    cpus: 0.25
+    mem_limit: 128m
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  siac-postgres:
+    image: postgres:17
+    container_name: siac-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SIAC_AUTH_DB_PASSWORD: ${SIAC_AUTH_DB_PASSWORD}
+      SIAC_CORE_DB_PASSWORD: ${SIAC_CORE_DB_PASSWORD}
+    volumes:
+      - siac-postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - siac-internal
+    cpus: 0.50
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+networks:
+  siac-edge:
+    name: siac-edge
+    external: true
+  siac-internal:
+    name: siac-internal
+    internal: true
+
+volumes:
+  siac-postgres-data:
+    name: siac-postgres-data

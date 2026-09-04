@@ -10,10 +10,10 @@ Papéis fixos do produto:
 
 | Papel | Descrição |
 |---|---|
-`SUPER_ADMIN_SIAC` | Administração da plataforma toda  |
+| `SUPER_ADMIN_SIAC` | Administração da plataforma toda (equivalente a `ADMIN_SIAC` com acesso irrestrito, sem âmbito) |
 | `ADMIN_SIAC` | Administração da plataforma (nós) |
 | `GESTOR_CONDOMINIO` | Empresa/pessoa que administra um ou mais condomínios |
-| `REPRESENTANTE_CONDOMINIO` | Operação diária no local |
+| `REPRESENTANTE_CONDOMINIO` | Representante eleito do condomínio, acompanha a gestão e a operação diária no local |
 | `TECNICO_FORNECEDOR` | Externo, acesso restrito às suas intervenções |
 | `CONDOMINO` | Proprietário/residente de fração |
 
@@ -40,6 +40,10 @@ acesso a dados. Todo o utilizador (exceto `ADMIN_SIAC`) tem um ou mais
 
 ### CORE — `siac-core` (fase 2)
 
+`siac-core` absorve as responsabilidades do antigo `siac-operacoes`
+(decisão de 2026-09-04, ver `docs/arquitetura.md` §8): um único
+serviço/schema cobre condomínios, frações, pessoas e operações do dia a dia.
+
 - **RF-CORE-01** — CRUD de condomínios (dados administrativos, morada).
 - **RF-CORE-02** — CRUD de blocos e frações (permilagem, tipologia, estado).
 - **RF-CORE-03** — CRUD de pessoas e ligação pessoa↔fração
@@ -48,25 +52,27 @@ acesso a dados. Todo o utilizador (exceto `ADMIN_SIAC`) tem um ou mais
   sempre filtrado pelo âmbito do token.
 - **RF-CORE-05** — `CONDOMINO` vê apenas os dados do seu condomínio e da(s)
   sua(s) fração(ões).
+- **RF-CORE-06** (ex-RF-OPER-01) — Registo de ocorrências (título,
+  descrição, fração/zona, prioridade, fotos), por qualquer papel com âmbito
+  no condomínio.
+- **RF-CORE-07** (ex-RF-OPER-02) — Fluxo de estados da ocorrência: aberta →
+  em curso → resolvida/fechada, com histórico.
+- **RF-CORE-08** (ex-RF-OPER-03) — CRUD de equipamentos e plano de
+  manutenções.
+- **RF-CORE-09** (ex-RF-OPER-04) — CRUD de fornecedores; `TECNICO_FORNECEDOR`
+  só vê ocorrências/manutenções que lhe estão atribuídas.
 
-### OPER — `siac-operacoes` (fase 3)
+### FIN — `siac-financeiro` (fase 3)
 
-- **RF-OPER-01** — Registo de ocorrências (título, descrição, fração/zona,
-  prioridade, fotos), por qualquer papel com âmbito no condomínio.
-- **RF-OPER-02** — Fluxo de estados da ocorrência: aberta → em curso →
-  resolvida/fechada, com histórico.
-- **RF-OPER-03** — CRUD de equipamentos e plano de manutenções.
-- **RF-OPER-04** — CRUD de fornecedores; `TECNICO_FORNECEDOR` só vê
-  ocorrências/manutenções que lhe estão atribuídas.
-
-### FIN — `siac-financeiro` (fase 4)
+Rename planeado para `siac-billing` (ver `docs/arquitetura.md` §8); RF
+mantêm-se, só a nomenclatura de serviço/entidades muda quando a fase abrir.
 
 - **RF-FIN-01** — Definição de quotas por fração (permilagem ou valor fixo).
 - **RF-FIN-02** — Lançamento de movimentos (receitas/despesas) por condomínio.
 - **RF-FIN-03** — Mapa de quotas: pagas, pendentes, em atraso.
 - **RF-FIN-04** — `CONDOMINO` vê apenas o extrato da sua fração.
 
-### ASSEMB — `siac-assembleias` (fase 5)
+### ASSEMB — `siac-assembleias` (fase 4)
 
 - **RF-ASSEMB-01** — Criação de convocatórias com ordem de trabalhos.
 - **RF-ASSEMB-02** — Registo de presenças e representações.

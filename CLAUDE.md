@@ -10,57 +10,20 @@ autenticação estar implementada).
 ## Stack
 
 - **Backend**: Java 21 + Spring Boot 3.x — um micro-serviço por domínio, cada
-  um no seu container (`siac-auth`, `siac-core que inclui operaçoes docker container:
-
-condominium-core
-        │
-        ├── Condomínios
-        ├── Frações
-        ├── Pessoas
-        ├── Ocorrências
-        ├── Equipamentos
-        ├── Manutenções
-        ├── Documentos
-        └── Fornecedores`, 
-
-BILLING SERVICE
-│
-├── QUOTA
-│
-├── PAGAMENTO
-│
-├── RECIBO
-│
-├── FATURA
-│
-├── DESPESA
-│
-├── ORCAMENTO
-│
-└── CONTA_CORRENTE
-
-        
-BILLING DB
-
-QUOTA
---------------------
-id
-tenant_id
-condominio_id
-fracao_id
-valor
-vencimento
-estado
-
-
-. Migrações com Flyway.
+  um no seu container. `siac-core` absorve o antigo `siac-operacoes`: cobre
+  Condomínios, Frações, Pessoas, Ocorrências, Equipamentos, Manutenções,
+  Documentos e Fornecedores num único serviço/schema. Os restantes:
+  `siac-auth` (autenticação) e `siac-assembleias`. `siac-financeiro` tem
+  rename planeado para `siac-billing` (entidades Quota, Pagamento, Recibo,
+  Fatura, Despesa, Orçamento, Conta-corrente) — decisão registada, execução
+  na Fase 3, ver `docs/arquitetura.md`. Migrações com Flyway.
 - **Frontend**: único — React + TypeScript + Vite, servido por nginx
   (`siac-frontend`), que faz reverse-proxy de `/api/<serviço>/` para cada
   backend. É o único ponto de entrada HTTP.
 - **Base de dados**: PostgreSQL 17 (`siac-postgres`), uma instância, **um
-  schema por serviço** (`siac_auth`, `siac_core`, `siac_operacoes`,
-  `siac_financeiro`, `siac_assembleias`). Cada serviço tem o seu utilizador de
-  BD com acesso apenas ao seu schema.
+  schema por serviço** (`siac_auth`, `siac_core`, `siac_financeiro`,
+  `siac_assembleias`). Cada serviço tem o seu utilizador de BD com acesso
+  apenas ao seu schema.
 - **Exposição**: túnel Cloudflare `siac` já existente
   (`docker-compose.tunnel.yml`, ver `TUNNEL.md`).
 
@@ -80,7 +43,9 @@ siac/
 │   └── testes.md              # estratégia e regras de testes
 ├── backend/
 │   ├── siac-auth/             # autenticação, utilizadores, papéis, âmbitos
-│   ├── siac-core/             # condomínios, frações, pessoas
+│   ├── siac-core/             # condomínios, frações, pessoas, ocorrências,
+│   │                           # equipamentos, manutenções, documentos,
+│   │                           # fornecedores
 │   └── ...                    # restantes serviços, criados por fase
 ├── frontend/                  # app React única + nginx.conf
 └── postgres/init/             # scripts de bootstrap (schemas, utilizadores)
@@ -93,8 +58,9 @@ siac/
    queries → só depois endpoints com dados. Nenhum endpoint de dados pode ir
    para além de dados demo enquanto não validar JWT **e** âmbito. Não repetir o
    erro da v1 (API pública sem auth).
-2. **Papel nunca chega.** Papéis fixos: `SUPER_ADMIN_SIAC`,`ADMIN_SIAC`, `GESTOR_CONDOMINIO`,
-   `REPRESENTANTE_CONDOMINIO`, `TECNICO_FORNECEDOR`, `CONDOMINO`. Todo o acesso exige
+2. **Papel nunca chega.** Papéis fixos: `SUPER_ADMIN_SIAC`, `ADMIN_SIAC`,
+   `GESTOR_CONDOMINIO`, `REPRESENTANTE_CONDOMINIO`, `TECNICO_FORNECEDOR`,
+   `CONDOMINO`. Todo o acesso exige
    também um **âmbito** explícito (`condominio_id`, opcionalmente
    `fracao_id`). Um `condominio_id` vindo do cliente nunca é confiável — tem
    de ser validado contra os âmbitos do token.

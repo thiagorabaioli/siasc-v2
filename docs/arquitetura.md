@@ -21,16 +21,13 @@ flowchart LR
     subgraph siac-internal [siac-internal - sem saida para o exterior]
         F -->|/api/auth/| A[siac-auth]
         F -->|/api/core/| C[siac-core]
-        F -->|/api/operacoes/| O[siac-operacoes]
         F -->|/api/financeiro/| FI[siac-financeiro]
         F -->|/api/assembleias/| AS[siac-assembleias]
         A --> P[(siac-postgres)]
         C --> P
-        O --> P
         FI --> P
         AS --> P
         C -.valida JWT via JWKS.-> A
-        O -.-> A
         FI -.-> A
         AS -.-> A
     end
@@ -50,7 +47,8 @@ avalia-se Spring Cloud Gateway mais tarde.
 | `siac-postgres` | `postgres:17` | `siac-internal` | 0.50 cpu / 512m | 0 |
 | `siac-auth` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 1 |
 | `siac-core` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 2 |
-| 
+| `siac-financeiro` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 3 |
+| `siac-assembleias` | `eclipse-temurin:21-jre` | `siac-internal` | 0.50 cpu / 384m | 4 |
 
 Notas:
 - Host é um Raspberry Pi 5 (ARM64, RAM partilhada com outras stacks): imagens
@@ -85,10 +83,13 @@ a exceção, não a regra — quando necessária, é HTTP interno via
 | Serviço | Schema | Responsabilidade |
 |---|---|---|
 | `siac-auth` | `siac_auth` | Utilizadores, credenciais, papéis, **âmbitos**, emissão de JWT (RS256), endpoint JWKS |
-| `siac-core` | `siac_core` | Condomínios, blocos, frações, pessoas, ligação pessoa↔fração |
-| `siac-operacoes` | `siac_operacoes` | Ocorrências, equipamentos, fornecedores, manutenções |
-| `siac-financeiro` | `siac_financeiro` | Quotas, movimentos, mapas |
+| `siac-core` | `siac_core` | Condomínios, blocos, frações, pessoas, ligação pessoa↔fração, ocorrências, equipamentos, manutenções, documentos, fornecedores |
+| `siac-financeiro` | `siac_financeiro` | Quotas, movimentos, mapas (rename planeado para `siac-billing`, ver decisão abaixo) |
 | `siac-assembleias` | `siac_assembleias` | Convocatórias, atas, deliberações |
+
+`siac-operacoes` deixou de existir como serviço independente — as suas
+responsabilidades (ocorrências, equipamentos, manutenções, fornecedores)
+foram absorvidas por `siac-core` (decisão de 2026-09-04, ver §8).
 
 ### Autenticação e autorização
 
@@ -131,3 +132,15 @@ com `docs/requisitos.md`.
   para o host; instâncias separadas seriam desperdício de RAM.
 - **Túnel reaproveitado** — infraestrutura já validada; nada a alterar além
   de adicionar o hostname na fase certa.
+- **`siac-operacoes` fundido em `siac-core`** (2026-09-04) — ocorrências,
+  equipamentos, manutenções, documentos e fornecedores passam a viver no
+  mesmo serviço/schema que condomínios/frações/pessoas. Um serviço a menos
+  a correr no Pi; mantém-se a separação lógica dentro do serviço (pacotes
+  por domínio). Ver `docs/tarefas.md` e `docs/requisitos.md` para as tarefas
+  e RF reorganizados.
+- **`siac-financeiro` → `siac-billing` (planeado, não executado)** —
+  intenção registada de renomear o serviço e adotar nomenclatura de
+  entidades em inglês (Quota, Pagamento, Recibo, Fatura, Despesa, Orçamento,
+  Conta-corrente). Só executa na Fase 3; até lá o nome e schema mantêm-se
+  `siac-financeiro` / `siac_financeiro` para não bloquear o trabalho atual
+  em `siac-core`.
