@@ -9,8 +9,8 @@ paralelo).
 
 - [x] Reaproveitar túnel Cloudflare `siac` (`docker-compose.tunnel.yml`, `TUNNEL.md`)
 - [x] Estrutura do repositório + documentação base (CLAUDE.md, docs/)
-- [ ] `git init` + primeiro commit + repo remoto (`thiagorabaioli/siasc`)
-- [ ] `.env.example` completo e `.gitignore`
+- [x] `git init` + primeiro commit + repo remoto (`thiagorabaioli/siasc-v2`)
+- [x] `.env.example` completo e `.gitignore`
 - [ ] `docker-compose.yml` com `siac-postgres` (rede `siac-internal`, volume, limites, healthcheck)
 - [ ] `postgres/init/`: base `siac`, schemas e um role por serviço com grants restritos
 - [ ] Esqueleto `siac-frontend` (Vite + React + TS, Dockerfile nginx non-root, proxy `/api/`)
