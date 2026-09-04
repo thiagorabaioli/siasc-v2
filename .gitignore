@@ -1,0 +1,18 @@
+# Segredos — nunca commitar
+.env
+*.pem
+*.key
+
+# Java / Maven
+target/
+*.class
+
+# Node / frontend
+node_modules/
+dist/
+
+# IDE / SO
+.idea/
+.vscode/
+*.iml
+.DS_Store
